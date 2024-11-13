@@ -9,14 +9,6 @@ This installation proposes to merge old and new digital technologies to create a
 
 CREDITS:
 Idea: Filipe Lopes
-
-Videos | Music:
-Tempo: Pedro Afonso | Filipe Lopes
-19:22, Vilar: Francisca Dores | Filipe Lopes
-Wimbledon: Rosana Soares | Rosana Soares
-Sea Bird Blows: João Leal | João Leal
-Rua do Mar: Mariana Barros | Filipe Lopes
-
 Technological implementation: Filipe Lopes
 
 www.filipelopes.net
