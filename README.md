@@ -8,6 +8,7 @@ Computer technologies are ubiquitous in modern life. They mediate many of our da
 This installation proposes to merge old and new digital technologies to create an experience on “slowing down the passage of time”. It does so by inviting individuals to listen and see specific audiovisual postcards. Dial an old rotary telephone and choose your postcard. Breath. Take your time, recover your time. Enjoy. Breath.
 
 CREDITS:
+
 Idea: Filipe Lopes
 
 Technological implementation: Filipe Lopes
