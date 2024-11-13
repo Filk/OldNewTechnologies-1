@@ -9,6 +9,7 @@ This installation proposes to merge old and new digital technologies to create a
 
 CREDITS:
 Idea: Filipe Lopes
+
 Technological implementation: Filipe Lopes
 
 www.filipelopes.net
