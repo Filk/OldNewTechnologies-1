@@ -1,8 +1,7 @@
 **Old New Technologies #1**
 
 An old rotary phone connected to an Arduino Uno and Processing.
-
-the videos in this repository are not the ones presented in the installation. They are retrived from free online stock videos webpages.
+The videos in this repository are not the ones presented in the installation. They are retrived from free online stock videos webpages just to make the Processing sketch to work.
 
 --
 
