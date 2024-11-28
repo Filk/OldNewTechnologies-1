@@ -8,12 +8,12 @@ int statusHandset=0;//checks if telephone handset is picked up or set down
 int runningNumberDialled, numberDialled;//checks number dialled
 boolean reset;
 
-StringList codePostcards = new StringList ("2289", "3217", "5561", "9641", "4366"); //number to be dialled
+StringList codePostcards = new StringList ("2289", "3217", "4461", "9641", "4366"); //number to be dialled
 StringList dialledNumbers;
 String dialledNumbersJoined;
 boolean [] postcard = new boolean[codePostcards.size()];
 boolean postcardOver=true;
-boolean postcardOverFilm=false;
+boolean postcardPlaying = false;
 
 int sizeText=52;
 
@@ -21,11 +21,12 @@ Movie [] myMovies = new Movie[codePostcards.size()+2]; // TOTAL NUMBER OF FILMS
 
 void setup() 
 {
-  size(800, 600);
-  frameRate(30);
-  //println(Serial.list().length); // Prints out the available serial ports.
+  //size(800, 600);
+  fullScreen();
+  //frameRate(30);
+  //println(Serial.list()); // Prints out the available serial ports.
   //println(Serial.list()[0]);
-  myPort = new Serial(this, "/dev/cu.usbmodem14101", 9600);
+  myPort = new Serial(this, "/dev/cu.usbmodem14201", 9600);
   myPort.clear();
   
   dialledNumbers = new StringList();
@@ -48,6 +49,12 @@ void draw() {
   retriveDataFromArduino ();
   playVideos();
   reset = false;
+  
+  for (int i=0; i<codePostcards.size();i++) {
+   if (postcard[codePostcards.index(codePostcards.get(i))]) {
+     playPostcards(codePostcards.index(codePostcards.get(i)));
+   }
+  }
 }
 
 
@@ -64,7 +71,7 @@ void playVideos() {
   
   //telephone handle picked up
   if (statusHandset==1) {
-    if(dialledNumbers.size()<4 && postcardOver) {
+    if(dialledNumbers.size()<4) {
       myMovies[1].loop();
       if (myMovies[1].available()) {
           myMovies[1].read(); // Reads new frames from the movie
@@ -77,7 +84,10 @@ void playVideos() {
     fill(0, 30, 212);
     if (dialledNumbers.size()>0) {
       for (int k=0; k<dialledNumbers.size(); k++) {
+        if (postcardOver) {
+        textAlign(RIGHT);
         text(dialledNumbers.get(k), ((width/2)-(sizeText*2))+(k*sizeText), height-(sizeText*2.5));
+        }
       }
       
       if (dialledNumbers.size()==4) { //starts to compare the number dialed
@@ -86,16 +96,21 @@ void playVideos() {
         postcardOver=false;
     
         for (int i=0; i<codePostcards.size();i++) {
-          if(dialledNumbersJoined.equals(codePostcards.get(i))) { //compares dialled number with numbers on the databae
+          if(dialledNumbersJoined.equals(codePostcards.get(i))&& !postcardPlaying) { //compares dialled number with numbers on the databae
             postcard[codePostcards.index(codePostcards.get(i))]=true;
-            playPostcards(codePostcards.index(codePostcards.get(i)));
+            myMovies[codePostcards.index(codePostcards.get(i))+2].play();
+            //playPostcards(codePostcards.index(codePostcards.get(i)));
+            postcardPlaying=true;
           }
-          if(!dialledNumbersJoined.equals(codePostcards.get(i)) && !postcardOverFilm) { //compares dialled number with numbers on the databae
+        }
+        
+        for (int i=0; i<codePostcards.size();i++) {
+          if(!dialledNumbersJoined.equals(codePostcards.get(i)) && !postcardPlaying) { //compares dialled number with numbers on the databae
             background(255); //stays like this until handhelpd is put down
             fill(100, 30, 212);
-            text("wrong number!", (width/2)-(width*0.2), (height/2)-(height*0.05));
-            text("hang up and dial again!", (width/2)-(width*0.3), (height/2)+(height*0.05));
-            postcardOverFilm=true;
+            textAlign(CENTER);
+            text("wrong number!", (width/2), (height/2)-(height*0.05));
+            text("hang up and dial again!", (width/2), (height/2)+(height*0.05));
           }
         }
       } 
@@ -108,7 +123,6 @@ void playPostcards(int numberVideoToBePlayed) {
   int offSet = 2; //video number in the array needs to be offsetted to trigger right video
   
   if(postcard[indexOfPostcard] && statusHandset==1) {
-    myMovies[indexOfPostcard+offSet].play();
     if (myMovies[indexOfPostcard+offSet].available()) {
       myMovies[indexOfPostcard+offSet].read(); // Reads new frames from the movie
      }
@@ -121,7 +135,9 @@ void playPostcards(int numberVideoToBePlayed) {
     dialledNumbersJoined="";
     dialledNumbers.clear();
     postcardOver=true;
-    postcardOverFilm=false;
+    postcardPlaying=false;
+    postcard[indexOfPostcard]=false;
+    println("terminou");
   }
 }
 
@@ -130,28 +146,35 @@ void retriveDataFromArduino () {
   
   if (dataFromArduino != null) {   
     //checks if telephone handset is picked up or set down
+    //arduino sends value only if the variable changes
+    
     if (dataFromArduino.startsWith("ONOFF:")) {
       //println(dataFromArduino.length());
       char lastChar0 = dataFromArduino.charAt(dataFromArduino.length() - 3); // Get value after "ONOFF:"
       statusHandset = int (lastChar0)-48; //converts ASCII value to the real int
+      
+      //TELEPHONE HANDSET SET DOWN
       if (statusHandset==0) {
         //General things to reset
         for (int i=1; i<myMovies.length; i++) { //all the videos stop, besides the initial one
           myMovies[i].stop();
           myMovies[i].jump(0);
         }
-        for (int i=0; i<codePostcards.size(); i++) {
-          postcard[i]=false;
+        for (int i=0; i<codePostcards.size(); i++) { //codePostcards is the StringList of numbers that can be dialled and are assigned to videos
+          postcard[i]=false; //postcard is each audiovideo postcard itself, thus, it is not playing (size 5)
         }
-        dialledNumbersJoined="";
+        dialledNumbersJoined=""; //String of numbers that are added to the array when dialling is being made
         dialledNumbers.clear();
-        postcardOver=true;
-        postcardOverFilm=false;
+        postcardOver=true; //postcard checks if any audiovisual postcard is being played or if it has finished. starts with True
+        postcardPlaying=false;
       }
+      
+      //TELEPHONE HANDSET PICKED UP
       if (statusHandset==1) {
         dialledNumbersJoined="";
         dialledNumbers.clear();
         postcardOver=true;
+        postcardPlaying=false;
       }
       //println(statusHandset);
     };
